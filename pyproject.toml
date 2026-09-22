@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qphys"
+version = "0.1.0"
+description = "Quantum formalism as a modeling language: collapse models for time series, and learning the law from trajectories."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Dror Jacoby" }]
+dependencies = [
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "pandas>=2.0",
+    "sympy>=1.12",
+    "matplotlib>=3.8",
+]
+
+[project.optional-dependencies]
+# The classical baselines the quantum models must beat at matched capacity.
+baselines = ["hmmlearn>=0.3", "statsmodels>=0.14", "scikit-learn>=1.4"]
+# Project 2's networks.
+nn = ["torch>=2.0"]
+# Continuous measurement (Project 1 extension) and sparse regression.
+quantum = ["qutip>=5.0", "pysindy>=2.0"]
+notebooks = ["nbformat", "nbconvert", "jupyter", "ipykernel"]
+dev = ["qphys[baselines,nn,quantum,notebooks]", "pytest>=8.0", "ruff>=0.5"]
+all = ["qphys[baselines,nn,quantum,notebooks]"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = [
+    "slow: long-running (seed sweeps, network training)",
+    "network: needs the internet on a cold cache",
+]
+
+[tool.ruff]
+src = ["src", "tests"]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "RUF", "SIM", "RET"]
+ignore = ["E501", "RET504", "SIM108"]
+
+[tool.ruff.lint.per-file-ignores]
+# Physics code: `c` is the speed of light, `L` a Lagrangian, `E` an energy.
+"src/qphys/**" = ["E741", "N806"]
+"tests/**" = ["E741"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["qphys"]
