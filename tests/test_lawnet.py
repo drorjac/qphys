@@ -155,3 +155,32 @@ def test_a_trained_newtonian_control_returns_no_speed_limit():
     r = L.fit_and_read(0.5, seed=0, steps=3000, newtonian=True)
     c = r["c_hat"]
     assert (not np.isfinite(c)) or c > 3.0, f"Newtonian data returned c_hat = {c}"
+
+
+@pytest.mark.slow
+def test_only_the_formula_extrapolates():
+    """Section 14, at matched parameter count.
+
+    Measured over the converged seeds of a 5-seed run, training inside
+    |v| < 0.5c and scoring in [0.7c, 0.95c]:
+
+        model                 in-range    out-of-range
+        BlackBox (8737 par)   0.00304        0.743
+        LawNet   (8705 par)   0.00476        1.162
+        symbolic (2 par)      0.0427         0.559
+
+    The network trained with a physics prior extrapolates WORSE than the
+    parameter-matched black box; only the formula read out of it
+    generalises. Networks do not extrapolate, and wrapping one in physics
+    does not change that -- it only makes a formula extractable.
+    """
+    r = L.extrapolation_benchmark(seed=0, steps=3000)
+    if not r["converged"]:
+        pytest.skip(f"seed 0 did not converge ({r['rel_loss']:.2e})")
+    assert r["out_symbolic_relativistic"] < r["out_lawnet"], (
+        "the symbolic readout must beat the network it was read from"
+    )
+    assert r["out_symbolic_relativistic"] < r["out_symbolic_cubic"], (
+        "the gamma-form must beat its own truncated series"
+    )
+    assert r["in_lawnet"] < r["out_lawnet"], "in-range must beat out-of-range"

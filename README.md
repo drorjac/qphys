@@ -181,6 +181,31 @@ quintic**, at `c_hat = 0.9870 ± 0.0184`. The cubic readout is the default
 because it is lower variance and it is the method specified; the quintic is
 one keyword away.
 
+### Claim 4b: only the formula extrapolates
+
+Section 14, trained inside `|v| < 0.5c` and scored in `[0.7c, 0.95c]`, over
+the converged seeds of a 5-seed run, with the black box matched on parameter
+count (8737 against 8705, a 0.4% difference):
+
+| model | free params | in-range | out-of-range |
+|---|---|---|---|
+| BlackBox | 8737 | **0.00304 ± 0.0008** | 0.743 ± 0.075 |
+| LawNet (neural) | 8705 | 0.00476 ± 0.0018 | 1.162 ± 0.080 |
+| symbolic, gamma-form | 2 | 0.0427 ± 0.0007 | **0.559 ± 0.007** |
+| symbolic, cubic truncation | 2 | — | 1.219 ± 0.017 |
+
+- **In-range the black box wins.** The physics prior costs a little
+  in-distribution, which is what it should cost.
+- **Out of range only the formula generalises**, and it is also an order of
+  magnitude more stable across seeds (0.007 against 0.075).
+- **The physics-structured network extrapolates worse than the plain black
+  box.** Structure does not make a network extrapolate; it makes a formula
+  extractable, and the formula extrapolates. The pipeline is *network
+  interpolates, symbolic fit, extrapolate the formula* -- never the network
+  alone.
+- **A truncated series is not a law.** The cubic readout, carrying the same
+  information as the gamma-form, is the worst arm out of range.
+
 ### The convergence gate had to be fixed before the noisy rows meant anything
 
 The first sweep reported a **100% failure rate** at 5% and 10% noise. That was
