@@ -21,24 +21,51 @@ REPORTS = Path(__file__).resolve().parents[3] / "reports"
 
 
 def seattle_comparison(
-    hmm_restarts: int = 25, hqmm_restarts: int = 12, save: bool = True
+    hmm_restarts: int = 8,
+    hqmm_restarts: int = 5,
+    n_seeds: int = 5,
+    save: bool = True,
 ) -> pd.DataFrame:
-    """Every model on the same temporal split, at stated capacity.
+    """Every model on the same temporal split, at stated capacity, over seeds.
 
-    The HMM restarts are not optional. Without them k = 2 and k = 3 converge
-    to a degenerate single-emission solution and return exactly the i.i.d.
-    likelihood, which would make the comparison unfair in the HQMM's favour.
+    Two things this function refuses to do, both learned the hard way here:
+
+    **It does not report a single fit.** One hqmm-d3 fit reached 0.8464 bits,
+    which at 17 free parameters beats every classical model costing 17 or
+    fewer, and looked like a reversal of the headline. Over five seeds the
+    same configuration averages 0.8785 +- 0.0267, while hmm-2 sits at 0.8551
+    with a standard deviation of 9e-06. That 0.8464 was the favourable tail
+    of a wide distribution. Honesty rule 6 is what caught it.
+
+    **It does not under-tune the classical side.** Without restarts the HMM at
+    k = 2 and k = 3 converges to a degenerate single-emission solution and
+    returns exactly the i.i.d. likelihood, which would make the comparison
+    unfair in the HQMM's favour.
+
+    The deterministic models (i.i.d., Markov) are fitted once, since they have
+    no seed dependence to average over, and their std is reported as 0.
     """
     series = D.seattle_wet_dry()
     train, test = D.temporal_split(series.values)
-    rows = [B.fit_iid(train, test)]
-    # orders up to 4 (16 parameters): the HQMM at d = 3 costs 17, so a
-    # comparison that stops at order 3 (8 parameters) is not matched
-    # capacity -- it leaves the classical side a model it was entitled to.
-    rows += [B.fit_markov(train, test, order=o) for o in (1, 2, 3, 4)]
-    rows += [B.fit_hmm(train, test, k=k, n_restarts=hmm_restarts) for k in (2, 3, 4)]
-    rows += [B.fit_hqmm(train, test, d=d, n_restarts=hqmm_restarts) for d in (2, 3)]
-    df = pd.DataFrame(rows)[["model", "params", "nll"]]
+
+    rows = [B.fit_iid(train, test) | {"nll_std": 0.0, "n_seeds": 1}]
+    rows += [
+        B.fit_markov(train, test, order=o) | {"nll_std": 0.0, "n_seeds": 1}
+        for o in (1, 2, 3, 4)
+    ]
+
+    def over_seeds(fn, **kw):
+        vals = [fn(train, test, seed=100 * s, **kw) for s in range(n_seeds)]
+        return vals[0] | {
+            "nll": float(np.mean([v["nll"] for v in vals])),
+            "nll_std": float(np.std([v["nll"] for v in vals], ddof=1)),
+            "n_seeds": n_seeds,
+        }
+
+    rows += [over_seeds(B.fit_hmm, k=k, n_restarts=hmm_restarts) for k in (2, 3, 4)]
+    rows += [over_seeds(B.fit_hqmm, d=d, n_restarts=hqmm_restarts) for d in (2, 3)]
+
+    df = pd.DataFrame(rows)[["model", "params", "nll", "nll_std", "n_seeds"]]
     df["is_real_data"] = series.is_real
     if save:
         REPORTS.mkdir(parents=True, exist_ok=True)
