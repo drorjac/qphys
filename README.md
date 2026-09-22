@@ -111,7 +111,14 @@ mean because a third of these fits do not converge:
 | 0.3 | 0 | 3/5 | 0.9485 | 0.0024 | 0.9615 | 1.4% |
 | 0.5 | 0 | 3/5 | 0.8813 | 0.0022 | 0.8874 | 0.7% |
 | 0.5 | 2% | 3/5 | 0.8802 | 0.0030 | 0.8874 | 0.8% |
+| 0.5 | 5% | 3/5 | 0.8786 | 0.0043 | 0.8874 | 1.0% |
+| 0.5 | 10% | 3/5 | 0.8764 | 0.0064 | 0.8874 | 1.2% |
 | 0.7 | 0 | 3/5 | 0.7526 | 0.0007 | 0.7566 | 0.5% |
+
+**Noise barely touches it.** From clean data to 10% noise `c_hat` moves by
+0.6%, from 0.8813 to 0.8764, while its spread grows from 0.0022 to 0.0064 and
+the failure rate does not move at all. The method is limited by the readout
+and by whether a seed converges, not by measurement noise.
 
 The **readout floor** is `c_hat` recovered from the EXACT `gamma v` by the
 same cubic fit -- the error a perfect momentum function would still incur.
