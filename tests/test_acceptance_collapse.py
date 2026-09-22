@@ -11,6 +11,7 @@ import numpy as np
 import pytest
 
 from qphys.collapse import causal_states as cs
+from qphys.collapse import data as D
 from qphys.collapse import kraus
 from qphys.collapse import leggett_garg as lg
 from qphys.collapse import processes as pr
@@ -174,3 +175,49 @@ def test_classical_free_parameter_counts():
     assert free_params("hmm", k=2) == 5
     assert free_params("hmm", k=3) == 11
     assert free_params("hmm", k=4) == 19
+
+
+# --- state proliferation: the most common way this estimate goes wrong ----
+def test_a_structureless_process_has_no_statistical_complexity():
+    """THE negative control. Mersenne-Twister bits carry no structure, so
+    C_mu must stay near zero at every history length.
+
+    With float-equality merging it did not: nothing merged, and C_mu climbed
+    1.0, 2.0, 3.0, 4.0, 4.7, 5.5 bits at orders one to six -- pure
+    finite-sample state proliferation, reported as complexity.
+    """
+    mt = np.random.RandomState(0).randint(0, 2, 1461)
+    df = cs.complexity_vs_history(mt, orders=(1, 2, 3, 4))
+    assert df.C_mu.max() < 0.6, (
+        f"structureless bits returned up to {df.C_mu.max():.2f} bits of "
+        "classical complexity; the state merge is not merging"
+    )
+    assert df.C_q.max() < 0.1
+
+
+def test_complexity_plateaus_with_history_length_on_real_data():
+    """Both curves must flatten. A C_mu that keeps climbing with order is
+    measuring the number of histories, not the process."""
+    series = D.seattle_wet_dry()
+    df = cs.complexity_vs_history(series.values, orders=(2, 3, 4))
+    assert df.C_mu.std() < 0.1, f"C_mu has not plateaued: {df.C_mu.tolist()}"
+    assert df.C_q.std() < 0.05, f"C_q has not plateaued: {df.C_q.tolist()}"
+
+
+def test_the_quantum_saving_survives_at_the_plateau():
+    """The 72% saving is quoted from the order-1 chain. At the plateau, where
+    the estimate has stopped moving, it is larger still."""
+    series = D.seattle_wet_dry()
+    df = cs.complexity_vs_history(series.values, orders=(2, 3, 4))
+    saving = 1.0 - df.C_q.mean() / df.C_mu.mean()
+    assert saving > 0.7, f"saving at the plateau is only {saving:.1%}"
+
+
+def test_merging_is_a_statistical_test_when_counts_are_given():
+    """Two rows that differ by less than their sampling error are the same
+    state; two that differ by more are not."""
+    close = np.array([[0.50, 0.50], [0.52, 0.48]])
+    _, uniq = cs.merge_states(close, counts=np.array([100.0, 100.0]))
+    assert len(uniq) == 1, "rows within sampling error should merge"
+    _, uniq = cs.merge_states(close, counts=np.array([100000.0, 100000.0]))
+    assert len(uniq) == 2, "with enough counts the same gap is significant"

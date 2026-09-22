@@ -28,25 +28,58 @@ import numpy as np
 from qphys.common.metrics import shannon_bits, von_neumann_bits
 
 MERGE_TOL = 1e-9
+# Significance of the two-proportion test used when counts are supplied.
+# 2.5 sigma: loose enough that sampling noise does not split a real state,
+# tight enough that a genuinely different prediction survives.
+MERGE_Z = 2.5
 
 
-def merge_states(conditionals: np.ndarray, tol: float = MERGE_TOL):
+def merge_states(conditionals: np.ndarray, tol: float = MERGE_TOL, counts=None):
     """Group rows that predict the same future. Returns (labels, unique rows).
 
     This is the epsilon-machine's defining equivalence relation, and the
     reason `C_mu` is discontinuous at p = 0.5.
+
+    **With `counts`, equality is a statistical test rather than float
+    equality.** Two conditional distributions estimated from finite samples
+    are never exactly equal, so an exact-equality rule merges nothing and
+    `C_mu` climbs toward `order` bits for ANY process -- on Mersenne-Twister
+    bits, which have no structure whatsoever, it returned 1.0, 2.0, 3.0, 4.0,
+    4.7 and 5.5 bits at orders one to six. That is the state proliferation
+    this estimate is famous for, and an exact-equality merge guarantees it.
+
+    Passing the counts behind each row merges when the rows agree to within
+    the sampling error of a two-proportion comparison,
+    `z * sqrt(p(1-p) (1/n1 + 1/n2))`, which is the test CSSR makes.
     """
     rows = np.atleast_2d(np.asarray(conditionals, float))
+    n = None if counts is None else np.asarray(counts, float)
     labels = np.full(len(rows), -1, dtype=int)
     uniq: list = []
+    uniq_n: list = []
     for i, r in enumerate(rows):
         for j, u in enumerate(uniq):
-            if np.max(np.abs(r - u)) <= tol:
+            if n is None:
+                same = np.max(np.abs(r - u)) <= tol
+            else:
+                pooled = (r * n[i] + u * uniq_n[j]) / (n[i] + uniq_n[j])
+                se = np.sqrt(
+                    np.clip(pooled * (1.0 - pooled), 0.0, None)
+                    * (1.0 / n[i] + 1.0 / uniq_n[j])
+                )
+                same = bool(np.all(np.abs(r - u) <= MERGE_Z * se + tol))
+            if same:
                 labels[i] = j
+                if n is not None:
+                    w = uniq_n[j] / (uniq_n[j] + n[i])
+                    uniq[j] = w * u + (1.0 - w) * r
+                    uniq_n[j] = uniq_n[j] + n[i]
                 break
         else:
             labels[i] = len(uniq)
             uniq.append(r)
+            if n is not None:
+                uniq_n.append(n[i])
     return labels, np.array(uniq)
 
 
@@ -129,3 +162,71 @@ def perturbed_coin_c_q(p: float) -> float:
 def perturbed_coin_eigenvalues(p: float) -> np.ndarray:
     c = perturbed_coin_overlap(p)
     return np.array([(1.0 - c) / 2.0, (1.0 + c) / 2.0])
+
+
+# --- history length, and the failure mode it exposes -----------------------
+
+
+def conditional_table(symbols, order: int, n_symbols: int = 2, min_count: int = 1):
+    """P(next | history of `order` symbols), plus each history's weight.
+
+    Histories seen fewer than `min_count` times are dropped rather than
+    trusted: with 1461 points and order 8 there are 256 histories, most of
+    them seen once or twice, and a distribution estimated from one sample is
+    not a distribution.
+    """
+    s = np.asarray(symbols, int)
+    n = len(s) - order
+    if n <= 0:
+        return np.zeros((0, n_symbols)), np.zeros(0), np.zeros(0)
+    idx = np.zeros(n, dtype=int)
+    for j in range(order):
+        idx = idx * n_symbols + s[j : j + n]
+    counts = np.zeros((n_symbols**order, n_symbols))
+    np.add.at(counts, (idx, s[order:]), 1.0)
+    totals = counts.sum(axis=1)
+    keep = totals >= min_count
+    counts, totals = counts[keep], totals[keep]
+    if not len(totals):
+        return np.zeros((0, n_symbols)), np.zeros(0), np.zeros(0)
+    return counts / totals[:, None], totals / totals.sum(), totals
+
+
+def complexity_at_order(symbols, order: int, n_symbols: int = 2, min_count: int = 1):
+    """`C_mu` and `C_q` estimated from histories of a given length."""
+    cond, weight, counts = conditional_table(symbols, order, n_symbols, min_count)
+    if not len(weight):
+        return {"order": order, "n_states": 0, "C_mu": np.nan, "C_q": np.nan}
+    labels, uniq = merge_states(cond, counts=counts)
+    merged = np.zeros(len(uniq))
+    for i, lab in enumerate(labels):
+        merged[lab] += weight[i]
+    kets = quantum_causal_states(uniq)
+    rho = sum(w * np.outer(k, k) for w, k in zip(merged, kets, strict=True))
+    return {
+        "order": order,
+        "n_states": len(uniq),
+        "C_mu": shannon_bits(merged),
+        "C_q": von_neumann_bits(rho),
+    }
+
+
+def complexity_vs_history(symbols, orders=(1, 2, 3, 4, 5, 6), min_count: int = 5):
+    """The diagnostic sweep. **Both curves must plateau.**
+
+    If `C_mu` keeps climbing with history length, the estimate is measuring
+    finite-sample state proliferation rather than the process: at order `k`
+    there are `2^k` possible histories, and once most of them are seen a
+    handful of times each, no two of their conditional distributions are
+    exactly equal, nothing merges, and the entropy of the resulting state
+    distribution rises toward `k` bits whatever the process is.
+
+    This is the most common way a statistical-complexity estimate goes wrong,
+    so the sweep is part of the library rather than something to remember to
+    do.
+    """
+    import pandas as pd
+
+    return pd.DataFrame(
+        [complexity_at_order(symbols, o, min_count=min_count) for o in orders]
+    )

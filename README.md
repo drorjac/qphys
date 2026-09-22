@@ -82,6 +82,36 @@ classical model". It is that **1461 days of wet/dry carries about 0.855 bits
 per symbol of predictable structure, and five parameters is enough to
 capture it** -- after which extra capacity, of either kind, is noise.
 
+### Claim 2 needed a fix before its number meant anything
+
+The 72% saving is quoted from the estimated order-1 chain. Whether it
+describes the *process* depends on `C_mu` having stopped moving with history
+length, and the first implementation here failed that badly.
+
+With float-equality merging, nothing ever merges: two conditional
+distributions estimated from finite counts are never exactly equal. On
+**Mersenne-Twister bits**, which carry no structure at all, `C_mu` climbed
+1.0, 2.0, 3.0, 4.0, 4.7 and 5.5 bits at orders one to six -- it was measuring
+the number of histories, not the process. Seattle showed the same ramp, so
+its order-1 number could not be trusted either.
+
+Merging now uses a two-proportion test at 2.5 sigma, as CSSR does. The
+control collapses to ~0 bits at every order, and the real data plateaus:
+
+| order | states | `C_mu` | `C_q` |
+|---|---|---|---|
+| 1 | 2 | 0.984 | 0.276 |
+| 2 | 3 | 1.444 | 0.310 |
+| 3 | 3 | 1.444 | 0.310 |
+| 4 | 3 | 1.444 | 0.309 |
+
+So the process carries about **1.44 bits** of classical predictive state, not
+the 0.98 that order 1 alone suggests, and the saving at the plateau is
+**78.5%** rather than 71.9%. Both numbers are defensible about different
+objects -- 71.9% is a property of the first-order *model*, 78.5% of the
+process as far as this data can see it -- and the README quotes both rather
+than picking the flattering one.
+
 ### Claims 1 and 2 must never be conflated
 
 | Claim | What it is about | Status |
