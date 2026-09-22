@@ -34,9 +34,12 @@ def test_lagrangian_and_kinetic_energy_differ_at_fourth_order():
 
 def test_second_order_terms_agree():
     """Both give (1/2) m v^2, which is exactly why the quartic is needed."""
-    assert sp.simplify(
-        R.lagrangian_series(4).coeff(R.v, 2) - R.kinetic_series(4).coeff(R.v, 2)
-    ) == 0
+    assert (
+        sp.simplify(
+            R.lagrangian_series(4).coeff(R.v, 2) - R.kinetic_series(4).coeff(R.v, 2)
+        )
+        == 0
+    )
 
 
 def test_sixth_order_coefficients():

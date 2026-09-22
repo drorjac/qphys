@@ -45,9 +45,32 @@ def set_torch_seed(seed: int) -> None:
     torch.manual_seed(seed)
 
 
-def converged(rel_loss: float) -> bool:
-    """Did this run meet the pre-declared training-loss threshold?"""
-    return bool(np.isfinite(rel_loss) and rel_loss <= CONVERGENCE_REL_LOSS)
+def converged(rel_loss: float, noise_floor: float = 0.0) -> bool:
+    """Did this run meet the pre-declared threshold, above the noise floor?
+
+    A FIXED absolute threshold cannot work across noise levels, and assuming
+    it does silently destroys the noisy rows of a sweep. Injected noise puts
+    a floor under the achievable training loss -- measured here at 2.9e-04,
+    1.8e-03 and 7.3e-03 for 2%, 5% and 10% -- so a 1e-03 gate is reachable at
+    2% and **arithmetically impossible** at 5% and 10%. The first run of the
+    identifiability sweep duly reported a 100% failure rate at 5%, which said
+    nothing about the fits and everything about the gate.
+
+    So the quantity gated is the EXCESS over the floor. That keeps honesty
+    rule 7 intact: the floor is a property of the injection, fixed by the
+    experiment's design before any fit runs, and is not read off the answers.
+    """
+    if not np.isfinite(rel_loss):
+        return False
+    return bool(rel_loss - float(noise_floor) <= CONVERGENCE_REL_LOSS)
+
+
+def noise_floor(clean, noisy) -> float:
+    """The relative loss a perfect fit would still incur on injected noise."""
+    clean = np.asarray(clean, float)
+    noisy = np.asarray(noisy, float)
+    denom = float(np.mean(noisy**2))
+    return float(np.mean((noisy - clean) ** 2) / denom) if denom else 0.0
 
 
 def summarise(values, name: str = "value") -> dict:

@@ -49,10 +49,7 @@ def fit_markov(train, test, order: int = 1, n_symbols: int = 2) -> dict:
     probs = counts / counts.sum(axis=1, keepdims=True)
 
     joined = np.concatenate([tr[-order:], te])
-    lp = [
-        np.log(probs[ctx(joined, i), joined[i]])
-        for i in range(order, len(joined))
-    ]
+    lp = [np.log(probs[ctx(joined, i), joined[i]]) for i in range(order, len(joined))]
     return {
         "model": f"markov-{order}",
         "params": free_params("markov", order=order),

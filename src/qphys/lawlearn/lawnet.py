@@ -46,7 +46,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from qphys.common.seeding import CONVERGENCE_REL_LOSS, converged
+from qphys.common.seeding import CONVERGENCE_REL_LOSS, converged, noise_floor
 from qphys.lawlearn.relativistic import c_hat_from_momentum_coefficients
 
 DTYPE = torch.float64
@@ -237,14 +237,21 @@ def fit_and_read(
     on training loss than the converged ones.
     """
     x, v, a = relativistic_samples(n, v_max, seed, noise, newtonian=newtonian)
+    # The floor the injected noise puts under the training loss, computed
+    # from the injection rather than from the fit, so the gate stays
+    # pre-declared (honesty rule 7).
+    _, _, a_clean = relativistic_samples(n, v_max, seed, 0.0, newtonian=newtonian)
+    floor = noise_floor(a_clean, a)
     fit = train(x, v, a, seed=seed, steps=steps)
-    ok = converged(fit["rel_loss"])
+    ok = converged(fit["rel_loss"], noise_floor=floor)
     b1, b3 = read_momentum_coefficients(fit["net"], v_max)
     return {
         "v_max": v_max,
         "noise": noise,
         "seed": seed,
         "rel_loss": fit["rel_loss"],
+        "noise_floor": floor,
+        "rel_loss_excess": fit["rel_loss"] - floor,
         "converged": ok,
         "b1": b1,
         "b3": b3,
@@ -364,9 +371,7 @@ def _nrmse(truth, pred) -> float:
     ok = np.isfinite(pred)
     if not ok.any():
         return float("nan")
-    return float(
-        np.sqrt(np.mean((pred[ok] - truth[ok]) ** 2)) / np.std(truth[ok])
-    )
+    return float(np.sqrt(np.mean((pred[ok] - truth[ok]) ** 2)) / np.std(truth[ok]))
 
 
 def extrapolation_benchmark(

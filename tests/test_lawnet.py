@@ -47,7 +47,7 @@ def test_samples_match_the_analytic_acceleration():
 
 
 def test_newtonian_control_samples_have_no_gamma():
-    x, v, a = L.relativistic_samples(500, 0.6, seed=0, newtonian=True)
+    x, _v, a = L.relativistic_samples(500, 0.6, seed=0, newtonian=True)
     assert np.allclose(a, -x, atol=1e-12)
 
 
@@ -113,6 +113,30 @@ def test_convergence_gate_is_applied_before_the_answer_is_read():
     assert not converged(2.5e-2)
     assert not converged(float("nan"))
     assert CONVERGENCE_REL_LOSS == 1e-3
+
+
+def test_the_gate_accounts_for_the_floor_injected_noise_puts_under_it():
+    """A fixed absolute gate is arithmetically impossible to pass on noisy
+    data, and the first sweep reported a 100% failure rate at 5% noise for
+    exactly that reason -- which said nothing about the fits.
+
+    The floor is a property of the injection, known before any fit runs, so
+    gating the excess over it keeps the threshold pre-declared.
+    """
+    from qphys.common.seeding import converged
+
+    assert not converged(1.9e-3)  # impossible under a bare 1e-3 gate
+    assert converged(1.9e-3, noise_floor=1.83e-3)  # reachable above the floor
+    assert not converged(2.5e-2, noise_floor=1.83e-3)  # a real failure still fails
+
+
+@pytest.mark.parametrize("noise,expected", [(0.0, 0.0), (0.02, 2.9e-4), (0.05, 1.8e-3)])
+def test_the_noise_floor_is_what_it_is_measured_to_be(noise, expected):
+    from qphys.common.seeding import noise_floor
+
+    _, _, clean = L.relativistic_samples(20000, 0.5, seed=0, noise=0.0)
+    _, _, noisy = L.relativistic_samples(20000, 0.5, seed=0, noise=noise)
+    assert noise_floor(clean, noisy) == pytest.approx(expected, rel=0.15)
 
 
 @pytest.mark.slow

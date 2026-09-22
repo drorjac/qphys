@@ -139,7 +139,7 @@ def seattle_wet_dry() -> Series:
         name="seattle-weather",
         values=bits,
         is_real=True,
-        provenance=provenance("seattle-weather") | {"n": int(len(bits))},
+        provenance=provenance("seattle-weather") | {"n": len(bits)},
     )
 
 
