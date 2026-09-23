@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      # torch comes from default PyPI on purpose. download.pytorch.org has
+      # been seen to return 403 through a proxy, so the index is never
+      # hardcoded here.
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[baselines,nn,dev]'
+
+      - name: Lint
+        run: |
+          ruff check src tests
+          ruff format --check src tests
+
+      # The suite must pass with no network: every loader has an offline
+      # fallback, and a test that silently needs the internet is a test that
+      # will fail for someone else.
+      - name: Test (offline)
+        run: pytest -m "not slow" -q
+        env:
+          QPHYS_OFFLINE: "1"
+
+  slow:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[baselines,nn,dev]'
+      - name: Test (including seed sweeps and training)
+        run: pytest -q

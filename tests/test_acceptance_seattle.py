@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from qphys.collapse import data as D
@@ -18,18 +19,40 @@ from qphys.collapse import experiments as E
 REPORTS = Path(__file__).resolve().parents[1] / "reports"
 
 
-def test_the_data_is_what_it_claims_to_be():
+def _real_or_skip():
+    """These assertions describe the REAL series.
+
+    Offline -- in CI, or behind a firewall -- the loader returns a synthetic
+    stand-in, and asserting the real data's wet fraction against it would be
+    asserting a coincidence. The fallback has its own tests; this one skips,
+    loudly, rather than passing on the wrong data.
+    """
     series = D.seattle_wet_dry()
+    if not series.is_real:
+        pytest.skip("offline: loader returned the synthetic fallback")
+    return series
+
+
+def test_the_fallback_is_usable_and_says_it_is_not_real():
+    """Whatever the network does, the pipeline must run end to end."""
+    series = D.seattle_wet_dry()
+    assert len(series) > 100
+    assert set(np.unique(series.values)) <= {0, 1}
+    if not series.is_real:
+        assert "fallback" in series.provenance.get("note", "")
+
+
+def test_the_data_is_what_it_claims_to_be():
+    series = _real_or_skip()
     assert len(series) == 1461
     assert series.values.mean() == pytest.approx(0.426, abs=0.001)
-    if series.is_real:
-        assert series.provenance["sha256"]
-        assert series.provenance["bytes"] > 0
+    assert series.provenance["sha256"]
+    assert series.provenance["bytes"] > 0
 
 
 def test_the_split_is_temporal_and_not_pathological():
     """Honesty rule 4: fixed before the first fit, and not a lucky cut."""
-    train, test = D.temporal_split(D.seattle_wet_dry().values)
+    train, test = D.temporal_split(_real_or_skip().values)
     assert len(train) == 1022
     assert len(test) == 439
     assert test.mean() == pytest.approx(train.mean(), abs=0.02)
@@ -70,6 +93,7 @@ def test_memory_saving_is_large_and_is_not_a_prediction_claim():
 
     Holding at the same time as the prediction result failing is the point.
     """
+    _real_or_skip()
     m = E.seattle_memory(save=False)
     assert m["C_q_bits"] <= m["C_mu_bits"]
     assert m["C_mu_bits"] == pytest.approx(0.9844, abs=0.002)

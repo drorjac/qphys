@@ -192,12 +192,23 @@ def conditional_table(symbols, order: int, n_symbols: int = 2, min_count: int = 
     return counts / totals[:, None], totals / totals.sum(), totals
 
 
-def complexity_at_order(symbols, order: int, n_symbols: int = 2, min_count: int = 1):
-    """`C_mu` and `C_q` estimated from histories of a given length."""
+def complexity_at_order(
+    symbols,
+    order: int,
+    n_symbols: int = 2,
+    min_count: int = 1,
+    statistical: bool = True,
+):
+    """`C_mu` and `C_q` estimated from histories of a given length.
+
+    `statistical=False` restores the float-equality merge, which is kept so
+    the failure mode can be DRAWN rather than described: on structureless
+    bits it makes `C_mu` climb toward `order` bits.
+    """
     cond, weight, counts = conditional_table(symbols, order, n_symbols, min_count)
     if not len(weight):
         return {"order": order, "n_states": 0, "C_mu": np.nan, "C_q": np.nan}
-    labels, uniq = merge_states(cond, counts=counts)
+    labels, uniq = merge_states(cond, counts=counts if statistical else None)
     merged = np.zeros(len(uniq))
     for i, lab in enumerate(labels):
         merged[lab] += weight[i]
@@ -211,7 +222,9 @@ def complexity_at_order(symbols, order: int, n_symbols: int = 2, min_count: int 
     }
 
 
-def complexity_vs_history(symbols, orders=(1, 2, 3, 4, 5, 6), min_count: int = 5):
+def complexity_vs_history(
+    symbols, orders=(1, 2, 3, 4, 5, 6), min_count: int = 5, statistical: bool = True
+):
     """The diagnostic sweep. **Both curves must plateau.**
 
     If `C_mu` keeps climbing with history length, the estimate is measuring
@@ -228,5 +241,10 @@ def complexity_vs_history(symbols, orders=(1, 2, 3, 4, 5, 6), min_count: int = 5
     import pandas as pd
 
     return pd.DataFrame(
-        [complexity_at_order(symbols, o, min_count=min_count) for o in orders]
+        [
+            complexity_at_order(
+                symbols, o, min_count=min_count, statistical=statistical
+            )
+            for o in orders
+        ]
     )

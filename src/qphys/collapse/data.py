@@ -15,6 +15,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import os
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
@@ -74,6 +75,10 @@ def fetch(name: str, force: bool = False) -> Path | None:
     path = _cache_path(name)
     if path.exists() and not force:
         return path
+    # QPHYS_OFFLINE=1 forces the fallback path even where a network exists,
+    # so CI exercises the same code an adopter behind a firewall will hit.
+    if os.environ.get("QPHYS_OFFLINE") == "1":
+        return None
     RAW.mkdir(parents=True, exist_ok=True)
     try:
         with urllib.request.urlopen(SOURCES[name], timeout=TIMEOUT) as r:
