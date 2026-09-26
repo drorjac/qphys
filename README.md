@@ -138,6 +138,28 @@ pipeline runs **with no network**: every loader falls back, and
 `Series.is_real` tells you which you got, so a fallback is never silently
 substituted for real data.
 
+## Reproducing the results
+
+Every table in `results/` is written by a function under `src/qphys`, and a
+test fails if one is not. To regenerate and check them:
+
+```bash
+make reproduce     # qphys run all into build/reproduce, then qphys verify
+```
+
+`qphys verify` compares the regenerated tables with the committed ones at a
+relative tolerance of 1e-9 and exits non-zero on any difference.
+`results/environment.json` records the commit, package versions and whether
+the loaders were forced offline for the run that wrote it.
+
+| command | wall time (M2, macOS 13.4, CPU) | needs |
+|---|---|---|
+| `qphys run collapse` | 24 min | the Seattle series; cached in `data/raw/` after the first download |
+| `qphys run lawlearn` | hours (not re-timed) | nothing external; simulation only |
+
+`qphys run collapse` was last re-run on 2026-09-26: `seattle_table.csv` and
+`seattle_memory.json` reproduced byte for byte.
+
 ## Layout
 
 ```text
