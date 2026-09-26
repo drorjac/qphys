@@ -15,7 +15,6 @@ from __future__ import annotations
 import hashlib
 import io
 import json
-import os
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
@@ -24,7 +23,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-RAW = Path(__file__).resolve().parents[3] / "data" / "raw"
+from qphys.config import RAW_DIR, offline
+
+RAW = RAW_DIR
 TIMEOUT = 20
 
 SOURCES = {
@@ -77,7 +78,7 @@ def fetch(name: str, force: bool = False) -> Path | None:
         return path
     # QPHYS_OFFLINE=1 forces the fallback path even where a network exists,
     # so CI exercises the same code an adopter behind a firewall will hit.
-    if os.environ.get("QPHYS_OFFLINE") == "1":
+    if offline():
         return None
     RAW.mkdir(parents=True, exist_ok=True)
     try:

@@ -1,4 +1,4 @@
-"""Every figure in the repo, generated from `reports/` and from closed forms.
+"""Every figure in the repo, generated from `results/` and from closed forms.
 
     python -m qphys.common.figures          # all of them, into figures/
 
@@ -16,17 +16,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from qphys.common.plotting import INK, ROLE, label_at, note, use_style
-
-FIGURES = Path(__file__).resolve().parents[3] / "figures"
-REPORTS = Path(__file__).resolve().parents[3] / "reports"
+from qphys.config import FIGURES_DIR, RESULTS_DIR
 
 
 def _save(fig, name: str) -> Path:
-    FIGURES.mkdir(parents=True, exist_ok=True)
-    path = FIGURES / name
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+    path = FIGURES_DIR / name
     fig.savefig(path)
     plt.close(fig)
-    print(f"wrote {path.relative_to(FIGURES.parent)}")
+    print(f"wrote {path.relative_to(FIGURES_DIR.parent)}")
     return path
 
 
@@ -143,7 +141,7 @@ def fig_capacity() -> Path:
     import pandas as pd
 
     use_style()
-    path = REPORTS / "seattle_table.csv"
+    path = RESULTS_DIR / "seattle_table.csv"
     if not path.exists():
         raise FileNotFoundError("run qphys.collapse.experiments.seattle_comparison")
     df = pd.read_csv(path)
@@ -301,7 +299,7 @@ def fig_readout_floor() -> Path:
     from qphys.lawlearn.lawnet import readout_bias
 
     use_style()
-    path = REPORTS / "c_hat_sweep.csv"
+    path = RESULTS_DIR / "c_hat_sweep.csv"
     if not path.exists():
         raise FileNotFoundError("run qphys.lawlearn.experiments.c_hat_sweep")
     d = pd.read_csv(path)
@@ -370,7 +368,7 @@ def fig_momentum() -> Path:
     import pandas as pd
 
     use_style()
-    path = REPORTS / "c_hat_sweep.csv"
+    path = RESULTS_DIR / "c_hat_sweep.csv"
     d = pd.read_csv(path)
     row = d[(d.v_max == 0.5) & (d.noise == 0) & d.converged].iloc[0]
     b1, b3 = float(row.b1), float(row.b3)
@@ -423,7 +421,7 @@ def fig_extrapolation() -> Path:
     import pandas as pd
 
     use_style()
-    path = REPORTS / "extrapolation.csv"
+    path = RESULTS_DIR / "extrapolation.csv"
     if not path.exists():
         raise FileNotFoundError("run qphys.lawlearn.lawnet.extrapolation_benchmark")
     d = pd.read_csv(path)

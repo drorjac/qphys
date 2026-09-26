@@ -9,7 +9,7 @@ rho -> K_x rho K_x^dag / p(x),   p(x) = tr(K_x rho K_x^dag),   sum_x K_x^dag K_x
 ```
 
 Code: [`src/qphys/collapse`](../../src/qphys/collapse) ·
-Tables: [`reports/`](../../reports)
+Tables: [`results/`](../../results)
 
 > **What is never claimed.** No series here "is quantum". The claim under
 > test is whether this model is more efficient than the best classical model

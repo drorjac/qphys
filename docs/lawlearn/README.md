@@ -4,7 +4,7 @@ Hand a network only `(x, v, a)`. Never mention relativity, `γ`, or a speed
 limit. Then read the speed of light out of what it learned.
 
 Code: [`src/qphys/lawlearn`](../../src/qphys/lawlearn) ·
-Tables: [`reports/`](../../reports)
+Tables: [`results/`](../../results)
 
 ---
 

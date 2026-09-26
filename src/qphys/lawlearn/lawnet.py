@@ -391,7 +391,8 @@ def extrapolation_benchmark(
     rng = np.random.default_rng(seed + 500)
     xo = rng.uniform(-1.0, 1.0, n)
     sign = rng.choice([-1.0, 1.0], n)
-    vo = sign * rng.uniform(*v_out, n)
+    v_lo, v_hi = v_out
+    vo = sign * rng.uniform(v_lo, v_hi, n)
     ao = -xo / (1.0 / np.sqrt(1.0 - vo**2)) ** 3
 
     def neural(xx, vv):

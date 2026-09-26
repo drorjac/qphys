@@ -12,9 +12,8 @@ from pathlib import Path
 import pandas as pd
 
 from qphys.common.seeding import seeds, summarise
+from qphys.config import RESULTS_DIR
 from qphys.lawlearn import lawnet as L
-
-REPORTS = Path(__file__).resolve().parents[3] / "reports"
 
 # The identifiability sweep: how slow can the data be before the quartic term
 # of p(v) stops being readable, and how much noise can it carry.
@@ -28,6 +27,10 @@ IDENTIFIABILITY_ROWS = [
     (0.5, 0.10),
 ]
 
+# The noise rows alone, re-run once the convergence gate measured the excess
+# over the noise floor instead of the raw loss (see CHANGELOG, "Fixed").
+NOISE_ROWS = [row for row in IDENTIFIABILITY_ROWS if row[1] > 0]
+
 
 def c_hat_sweep(rows=None, n_seeds: int = 5, steps: int = 4000, out=None):
     """Recover c at each (v_max, noise), over at least five seeds.
@@ -37,7 +40,7 @@ def c_hat_sweep(rows=None, n_seeds: int = 5, steps: int = 4000, out=None):
     the method (honesty rule 6).
     """
     rows = rows or IDENTIFIABILITY_ROWS
-    out = Path(out) if out else REPORTS / "c_hat_sweep.csv"
+    out = Path(out) if out else RESULTS_DIR / "c_hat_sweep.csv"
     out.parent.mkdir(parents=True, exist_ok=True)
     collected: list = []
     for v_max, noise in rows:
@@ -77,14 +80,14 @@ def readout_comparison(v_maxes=(0.3, 0.5), n_seeds: int = 5, steps: int = 4000):
             r.pop("net", None)
             rows.append(r)
     df = pd.DataFrame(rows)
-    REPORTS.mkdir(parents=True, exist_ok=True)
-    df.to_csv(REPORTS / "readout_comparison.csv", index=False)
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    df.to_csv(RESULTS_DIR / "readout_comparison.csv", index=False)
     return df
 
 
 def summarise_sweep(path=None) -> pd.DataFrame:
     """The sweep table as it belongs in a report, against the readout floor."""
-    path = Path(path) if path else REPORTS / "c_hat_sweep.csv"
+    path = Path(path) if path else RESULTS_DIR / "c_hat_sweep.csv"
     d = pd.read_csv(path)
     out = []
     for (v_max, noise), grp in d.groupby(["v_max", "noise"]):
@@ -104,3 +107,28 @@ def summarise_sweep(path=None) -> pd.DataFrame:
     df = pd.DataFrame(out)
     df["gap_to_floor"] = (df.c_hat / df.readout_floor - 1.0).abs()
     return df
+
+
+def noise_rows(n_seeds: int = 5, steps: int = 4000):
+    """The noise rows of the sweep, with the noise floor and both readouts."""
+    return c_hat_sweep(
+        rows=NOISE_ROWS,
+        n_seeds=n_seeds,
+        steps=steps,
+        out=RESULTS_DIR / "c_hat_noise_rows.csv",
+    )
+
+
+def extrapolation(n_seeds: int = 5, steps: int = 4000) -> pd.DataFrame:
+    """Section 14 over seeds: only the formula extrapolates.
+
+    Every seed is kept, converged or not; the `converged` column is what the
+    summary filters on, so the failure rate stays visible.
+    """
+    out = RESULTS_DIR / "extrapolation.csv"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    rows = []
+    for seed in seeds(n_seeds):
+        rows.append(L.extrapolation_benchmark(seed=seed, steps=steps))
+        pd.DataFrame(rows).to_csv(out, index=False)
+    return pd.DataFrame(rows)

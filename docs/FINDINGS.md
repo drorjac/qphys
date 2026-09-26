@@ -1,7 +1,7 @@
 # Findings, in detail
 
 The README carries the figures and the claims table. This file carries the numbers behind them, and the corrections each one needed before it
-meant anything. Every table here is regenerated into `reports/` by the
+meant anything. Every table here is regenerated into `results/` by the
 experiment that produced it; none is typed by hand.
 
 ---

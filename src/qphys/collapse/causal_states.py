@@ -23,6 +23,8 @@ representation result and the prediction result strictly apart.
 
 from __future__ import annotations
 
+from typing import cast
+
 import numpy as np
 
 from qphys.common.metrics import shannon_bits, von_neumann_bits
@@ -132,7 +134,8 @@ def rho_causal(transition: np.ndarray, tol: float = MERGE_TOL) -> np.ndarray:
     for i, lab in enumerate(labels):
         weights[lab] += pi[i]
     kets = quantum_causal_states(uniq)
-    return sum(w * np.outer(k, k) for w, k in zip(weights, kets, strict=True))
+    rho = sum(w * np.outer(k, k) for w, k in zip(weights, kets, strict=True))
+    return cast(np.ndarray, rho)
 
 
 def c_q(transition: np.ndarray, tol: float = MERGE_TOL) -> float:

@@ -1,22 +1,19 @@
 """Acceptance test 11: the real-data comparison, where the HQMM loses.
 
 This is the headline negative result, so it is pinned twice: the committed
-table in `reports/` must keep showing the loss, and the comparison is re-run
+table in `results/` must keep showing the loss, and the comparison is re-run
 (at reduced restarts) to check the loss is a property of the data rather than
 of one saved CSV.
 """
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import numpy as np
 import pytest
 
 from qphys.collapse import data as D
 from qphys.collapse import experiments as E
-
-REPORTS = Path(__file__).resolve().parents[1] / "reports"
+from qphys.config import RESULTS_DIR
 
 
 def _real_or_skip():
@@ -62,7 +59,7 @@ def test_reported_table_still_shows_the_hqmm_losing():
     """The claims table says claim 1 is NOT SHOWN. If a future run overturns
     that, this fails and the README must be rewritten -- not the other way
     round."""
-    path = REPORTS / "seattle_table.csv"
+    path = RESULTS_DIR / "seattle_table.csv"
     if not path.exists():
         pytest.skip("run qphys.collapse.experiments.seattle_comparison first")
     import pandas as pd
@@ -79,7 +76,7 @@ def test_reported_table_still_shows_the_hqmm_losing():
 
 
 def test_the_best_model_overall_is_classical():
-    path = REPORTS / "seattle_table.csv"
+    path = RESULTS_DIR / "seattle_table.csv"
     if not path.exists():
         pytest.skip("comparison not run")
     import pandas as pd

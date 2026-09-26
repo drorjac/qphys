@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
 
@@ -36,6 +36,9 @@ jobs:
         run: |
           ruff check src tests
           ruff format --check src tests
+
+      - name: Types
+        run: mypy
 
       # The suite must pass with no network: every loader has an offline
       # fallback, and a test that silently needs the internet is a test that

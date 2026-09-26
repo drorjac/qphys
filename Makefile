@@ -2,7 +2,7 @@
 PYTHON ?= python
 PIP    ?= $(PYTHON) -m pip
 
-.PHONY: help install dev test test-all lint format figures experiments palette clean
+.PHONY: help install dev test test-all lint format figures experiments palette lock info clean
 
 help:  ## show this help
 	@grep -E '^[a-zA-Z_-]+:.*?##' $(MAKEFILE_LIST) \
@@ -21,23 +21,29 @@ test:  ## the fast suite: no training, no seed sweeps
 test-all:  ## everything, including network training and seed sweeps
 	$(PYTHON) -m pytest -q
 
-lint:  ## ruff check + format check
+lint:  ## ruff check + format check + mypy
 	$(PYTHON) -m ruff check src tests
 	$(PYTHON) -m ruff format --check src tests
+	$(PYTHON) -m mypy
 
 format:  ## apply ruff fixes and formatting
 	$(PYTHON) -m ruff check --fix src tests
 	$(PYTHON) -m ruff format src tests
 
-figures:  ## regenerate every figure from reports/
+figures:  ## regenerate every figure from results/
 	$(PYTHON) -m qphys.common.figures
 
 palette:  ## re-validate the chart palette (colour is computed, not eyeballed)
 	$(PYTHON) -m qphys.common.palette "#2a78d6,#eb6834,#1baf7a,#4a3aa7" light all
 
-experiments:  ## re-run the measured results (hours -- writes reports/)
-	$(PYTHON) -c "from qphys.collapse.experiments import seattle_comparison as f; f()"
-	$(PYTHON) -c "from qphys.lawlearn.experiments import c_hat_sweep as f; f()"
+experiments:  ## re-run every measured result (hours -- writes results/)
+	$(PYTHON) -m qphys.cli run all
+
+lock:  ## pin the environment that produced results/
+	$(PIP) freeze --exclude-editable > requirements.lock
+
+info:  ## resolved paths and switches
+	$(PYTHON) -m qphys.cli info
 
 clean:
 	rm -rf build dist src/*.egg-info .pytest_cache .ruff_cache

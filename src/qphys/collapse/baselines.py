@@ -145,6 +145,13 @@ def fit_hqmm(
         if res.fun < best_val:
             best, best_val = res.x, res.fun
 
+    if best is None:
+        # every restart returned a non-finite loss; there is no fit to score
+        return {
+            "model": f"hqmm-d{d}",
+            "params": free_params("hqmm", d=d, n_out=n_out),
+            "nll": np.inf,
+        }
     ks = kraus.kraus_from_flat(best, d, n_out)
     rho_after_train = kraus.final_state(ks, tr)
     nll = kraus.nll_bits_per_symbol(ks, te, rho_after_train)
