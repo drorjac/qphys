@@ -6,6 +6,14 @@ by the experiment that produced it.
 
 ## [Unreleased]
 
+### Added
+- **The reproduction contract.** `qphys verify CANDIDATE` compares a
+  regenerated results directory with `results/` number by number (relative
+  tolerance 1e-9), and `make reproduce` re-runs everything into
+  `build/reproduce/` and verifies. `qphys run` writes
+  `results/environment.json`: git commit, Python, platform, package versions,
+  and whether the loaders were forced offline.
+
 ## [0.2.0] - 2026-09-26
 
 ### Added

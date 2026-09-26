@@ -2,7 +2,7 @@
 PYTHON ?= python
 PIP    ?= $(PYTHON) -m pip
 
-.PHONY: help install dev test test-all lint format figures experiments palette lock info clean
+.PHONY: help install dev test test-all lint format figures experiments palette lock info reproduce clean
 
 help:  ## show this help
 	@grep -E '^[a-zA-Z_-]+:.*?##' $(MAKEFILE_LIST) \
@@ -38,6 +38,13 @@ palette:  ## re-validate the chart palette (colour is computed, not eyeballed)
 
 experiments:  ## re-run every measured result (hours -- writes results/)
 	$(PYTHON) -m qphys.cli run all
+
+REPRO ?= build/reproduce
+
+reproduce:  ## re-run everything into build/reproduce and compare with results/ (hours)
+	rm -rf $(REPRO)
+	QPHYS_RESULTS_DIR=$(REPRO)/results $(PYTHON) -m qphys.cli run all
+	$(PYTHON) -m qphys.cli verify $(REPRO)/results
 
 lock:  ## pin the environment that produced results/
 	$(PIP) freeze --exclude-editable > requirements.lock

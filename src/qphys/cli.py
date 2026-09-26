@@ -5,6 +5,7 @@
                            comparison, and the extrapolation benchmark
     qphys run all          both (hours)
     qphys figures [NAME]   every figure, or one, from results/
+    qphys verify CANDIDATE compare a regenerated results directory with results/
     qphys info             resolved paths, and whether the loaders are offline
 
 Every `run` target writes to results/ and nothing else. The tables there are
@@ -14,9 +15,15 @@ what the README and docs cite; this is how they are regenerated.
 from __future__ import annotations
 
 import argparse
+import json
+import platform
+import subprocess
 import sys
 import time
 from collections.abc import Callable, Sequence
+from datetime import UTC, datetime
+from importlib.metadata import PackageNotFoundError, version
+from pathlib import Path
 
 from qphys import __version__, config
 
@@ -35,6 +42,53 @@ def _lawlearn() -> None:
     E.noise_rows()
     E.readout_comparison()
     E.extrapolation()
+
+
+# The packages whose version can move a number in results/.
+PACKAGES = ("numpy", "scipy", "pandas", "torch", "hmmlearn", "scikit-learn")
+
+
+def _version(name: str) -> str | None:
+    try:
+        return version(name)
+    except PackageNotFoundError:
+        return None
+
+
+def _git(*args: str) -> str | None:
+    try:
+        out = subprocess.run(
+            ["git", *args],
+            cwd=config.ROOT,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=True,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return out.stdout.strip()
+
+
+def environment() -> dict:
+    """What produced a run: code, interpreter, libraries, and real or fallback data."""
+    status = _git("status", "--porcelain", "--untracked-files=no")
+    return {
+        "qphys": __version__,
+        "git_commit": _git("rev-parse", "HEAD"),
+        "git_dirty": None if status is None else bool(status),
+        "python": sys.version.split()[0],
+        "platform": platform.platform(),
+        "packages": {name: _version(name) for name in PACKAGES},
+        "offline": config.offline(),
+        "recorded_at": datetime.now(UTC).isoformat(timespec="seconds"),
+    }
+
+
+def _record_environment() -> None:
+    config.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    path = config.RESULTS_DIR / "environment.json"
+    path.write_text(json.dumps(environment(), indent=2, sort_keys=True) + "\n")
 
 
 TARGETS: dict[str, Callable[[], None]] = {
@@ -58,6 +112,10 @@ def build_parser() -> argparse.ArgumentParser:
     fig = sub.add_parser("figures", help="regenerate figures from results/")
     fig.add_argument("name", nargs="?", help="one figure, e.g. capacity")
 
+    ver = sub.add_parser("verify", help="compare regenerated results with results/")
+    ver.add_argument("candidate", help="the regenerated results directory")
+    ver.add_argument("--reference", default=None, help="default: results/")
+
     sub.add_parser("info", help="resolved paths and switches")
     return parser
 
@@ -67,6 +125,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "run":
         names = list(TARGETS) if args.target == "all" else [args.target]
+        _record_environment()
         for name in names:
             t0 = time.perf_counter()
             TARGETS[name]()
@@ -78,6 +137,22 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         build(args.name)
         return 0
+
+    if args.command == "verify":
+        from qphys import verify
+
+        reference = Path(args.reference) if args.reference else config.RESULTS_DIR
+        candidate = Path(args.candidate)
+        for d in (reference, candidate):
+            if not d.is_dir():
+                print(f"not a directory: {d}", file=sys.stderr)
+                return 2
+        results = verify.compare_dirs(reference, candidate)
+        for r in results:
+            if r.status != "identical":
+                print(f"  {r.status:16s} {r.path}  {r.detail}".rstrip())
+        print(verify.summary(results))
+        return 1 if any(r.failed for r in results) else 0
 
     if args.command == "info":
         print(f"qphys {__version__}")
