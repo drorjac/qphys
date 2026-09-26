@@ -1,12 +1,29 @@
 # Changelog
 
 All notable changes to this project are documented here. Dates are the date
-the work landed; every measured number cited is regenerated into `reports/`
+the work landed; every measured number cited is regenerated into `results/`
 by the experiment that produced it.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-26
+
 ### Added
+- **`qphys` console script** (`qphys run collapse|lawlearn|all`, `qphys
+  figures`, `qphys info`) and `qphys/config.py`: every path resolved in one
+  place and overridable by `QPHYS_DATA_DIR`, `QPHYS_RESULTS_DIR`,
+  `QPHYS_FIGURES_DIR`.
+- **Code behind every committed table.** `seattle_seeds.csv`,
+  `c_hat_noise_rows.csv` and `extrapolation.csv` had been committed with no
+  function that wrote them. `seattle_comparison` now writes the per-seed rows,
+  and `lawlearn.experiments` gains `noise_rows()` and `extrapolation()`.
+  `tests/test_cli.py` fails if a file in `results/` is not named by any module.
+- `docs/HYPOTHESES.md` (each claim, what would refute it, the test that
+  guards it), `docs/DECISIONS.md`, `docs/RELATED_WORK.md` with a checked
+  `docs/references.bib`, and `CITATION.cff`.
+- mypy in `make lint` and in CI; Python 3.13 in the CI matrix;
+  `requirements.lock`; `py.typed`; package metadata (licence, classifiers,
+  URLs).
 - Seven generated figures (`make figures`) and a README built around them.
 - Palette validator (`make palette`): the chart colours pass the lightness
   band, chroma floor, colour-vision-deficiency separation, normal-vision and
@@ -17,6 +34,8 @@ by the experiment that produced it.
 - MIT licence, contributing rules, pre-commit hooks, Makefile.
 
 ### Fixed
+- `fit_hqmm` no longer crashes when every restart returns a non-finite loss;
+  it returns `nll = inf`, as `fit_hmm` already did.
 - **State merging compared conditional distributions for float equality**, so
   nothing ever merged and `C_mu` counted histories rather than structure — on
   structureless bits it reported up to 5.5 bits. Now a two-proportion test at
@@ -33,6 +52,12 @@ by the experiment that produced it.
   averages 0.8785 ± 0.0267.
 - Tests that assert properties of the real series now skip loudly offline
   instead of failing against the synthetic fallback.
+
+### Changed
+- `reports/` is renamed `results/`, the same layout as physics-prior.
+- README citations corrected: Srinivasan, Gordon & Boots is **AISTATS 2018**,
+  not ICLR; CSSR is Shalizi & **Shalizi**, UAI 2004; Monras et al. is 2011.
+- CI badges point at `drorjac/qphys`.
 
 ## [0.1.0] - 2026-09-23
 

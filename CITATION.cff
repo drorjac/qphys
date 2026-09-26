@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "qphys: quantum formalism as a modeling language"
+abstract: >-
+  Two sub-projects under one set of honesty rules. `collapse` asks whether a
+  model built from the quantum formalism (Kraus operators, hidden quantum
+  Markov models, quantum causal states) predicts or represents a real time
+  series more efficiently than the best classical model at matched capacity.
+  `lawlearn` asks whether the speed of light can be read out of a network
+  trained on slow motion alone, and what actually extrapolates.
+type: software
+version: 0.2.0
+date-released: "2026-09-26"
+license: MIT
+repository-code: "https://github.com/drorjac/qphys"
+keywords:
+  - quantum causal states
+  - hidden quantum Markov models
+  - computational mechanics
+  - Leggett-Garg
+  - law discovery
+authors:
+  - family-names: Jacoby
+    given-names: Dror
+references:
+  - type: data
+    title: "Seattle weather (vega-datasets)"
+    url: "https://github.com/vega/vega-datasets"
+  - type: article
+    title: "Quantum mechanics can reduce the complexity of classical models"
+    authors:
+      - family-names: Gu
+        given-names: Mile
+      - family-names: Wiesner
+        given-names: Karoline
+      - family-names: Rieper
+        given-names: Elisabeth
+      - family-names: Vedral
+        given-names: Vlatko
+    journal: "Nature Communications"
+    volume: 3
+    start: 762
+    year: 2012
+    doi: "10.1038/ncomms1761"
