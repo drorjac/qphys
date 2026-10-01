@@ -95,7 +95,7 @@ def fig_state_proliferation() -> Path:
     for ax, statistical, title in zip(
         axes,
         (False, True),
-        ("Exact-equality merge — broken", "Two-proportion merge — correct"),
+        ("Exact-equality merge: broken", "Two-proportion merge: correct"),
         strict=True,
     ):
         for series, role, name in (
@@ -480,7 +480,7 @@ def fig_extrapolation() -> Path:
     ax.set_xscale("log")
     ax.set_xlim(1.4e-3, 4.0)
     ax.set_ylim(-0.6, len(arms) - 0.25)
-    ax.set_xlabel("nRMSE (log scale) — lower is better")
+    ax.set_xlabel("nRMSE (log scale), lower is better")
     ax.set_title("Networks interpolate; only the extracted formula extrapolates")
     ax.grid(axis="y", visible=False)
     ax.plot(

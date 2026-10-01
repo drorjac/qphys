@@ -45,7 +45,7 @@ by the experiment that produced it.
 - `fit_hqmm` no longer crashes when every restart returns a non-finite loss;
   it returns `nll = inf`, as `fit_hmm` already did.
 - **State merging compared conditional distributions for float equality**, so
-  nothing ever merged and `C_mu` counted histories rather than structure — on
+  nothing ever merged and `C_mu` counted histories rather than structure; on
   structureless bits it reported up to 5.5 bits. Now a two-proportion test at
   2.5σ, as CSSR does. Seattle's complexity plateaus at 1.44 bits and the
   quantum saving at the plateau is 78.5%.

@@ -116,7 +116,7 @@ count (8737 against 8705, a 0.4% difference):
 | BlackBox | 8737 | **0.00304 ± 0.0008** | 0.743 ± 0.075 |
 | LawNet (neural) | 8705 | 0.00476 ± 0.0018 | 1.162 ± 0.080 |
 | symbolic, gamma-form | 2 | 0.0427 ± 0.0007 | **0.559 ± 0.007** |
-| symbolic, cubic truncation | 2 | — | 1.219 ± 0.017 |
+| symbolic, cubic truncation | 2 | – | 1.219 ± 0.017 |
 
 - **In-range the black box wins.** The physics prior costs a little
   in-distribution, which is what it should cost.

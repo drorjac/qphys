@@ -1,4 +1,4 @@
-# lawlearn — learning the law
+# lawlearn: learning the law
 
 Hand a network only `(x, v, a)`. Never mention relativity, `γ`, or a speed
 limit. Then read the speed of light out of what it learned.
@@ -14,8 +14,8 @@ Tables: [`results/`](../../results)
 
 The textbook LNN parameterises `L(x, v)` and inverts the Euler–Lagrange
 equation. **That was tried and it failed**: relative loss stalled at 0.19 and
-`ĉ` came back at 0.70. The cause is gauge freedom — `L` is fixed only up to
-scale, an additive constant and any total time derivative — and under the
+`ĉ` came back at 0.70. The cause is gauge freedom (`L` is fixed only up to
+scale, an additive constant and any total time derivative), and under the
 scale gauge the optimiser drifts to tiny `λ` where the Hessian regulariser
 dominates and gradients die.
 
@@ -27,14 +27,14 @@ a = -V'(x) / p'(v)
 ```
 
 First derivatives only, no Hessian to invert: relative loss `1.1e-05` against
-`1.5e-02`. It is also the physically correct object — **special relativity is
+`1.5e-02`. It is also the physically correct object: **special relativity is
 precisely a statement about `p(v)`**. Newton says `p = mv`; relativity says
 `p = γmv`. That is the entire content.
 
 All three gauges are fixed explicitly: **parity** architecturally by
 antisymmetrising the momentum, **sign** at readout by flipping `(p, V)`
 together (a run really did return `b1 = −0.34`), and **scale** by reporting
-only scale-invariant quantities — `ĉ` is one, `m` is not.
+only scale-invariant quantities; `ĉ` is one, `m` is not.
 
 ## What actually limits the answer
 
@@ -42,7 +42,7 @@ only scale-invariant quantities — `ĉ` is one, `m` is not.
 
 The recovered `ĉ` tracks, to within **1.4% at every speed**, what a *perfect*
 momentum function would give under the same cubic readout. So the deficit
-belongs to the readout's truncation, not to the fit — the network learns
+belongs to the readout's truncation, not to the fit. The network learns
 `p(v)` well everywhere from 0.2c to 0.7c.
 
 Three consequences, each overturning a natural reading of the raw `ĉ` column:
@@ -54,7 +54,7 @@ Three consequences, each overturning a natural reading of the raw `ĉ` column:
   conditioning one: the truncation bias grows monotonically with range.
 
 Keeping the `v⁵` term trades bias for variance, and pays only where there is
-bias to remove — at 0.5c it moves `ĉ` from 0.8813 ± 0.0022 to
+bias to remove: at 0.5c it moves `ĉ` from 0.8813 ± 0.0022 to
 **0.9870 ± 0.0184**; at 0.3c it is marginally worse.
 
 **Noise barely touches any of this.** From clean data to 10% noise `ĉ` moves
@@ -81,7 +81,7 @@ matched on parameter count (8737 against 8705):
 
 `orbit.py` is the acceptance suite: Kepler's third law to 0.0002%, a force-law
 exponent of **−2.0000**, `GM` exact, and Mercury's perihelion precession at
-**42.98 arcsec/century** measured two independent ways — the closed form, and
+**42.98 arcsec/century** measured two independent ways: the closed form, and
 root-finding `du/dφ` on the integrated orbit.
 
 It is **not measured data**. It is a high-precision integration from real
@@ -89,6 +89,6 @@ published constants, which is exactly what makes it a good acceptance test.
 
 Mercury's perihelion speed is 59 km/s = **1.97e-4 c**, three orders below the
 identifiability floor, so the `ĉ` route **cannot** work on orbital data.
-General relativity enters there through the *secular precession* — a
-cumulative effect over 415 orbits per century — not the instantaneous
+General relativity enters there through the *secular precession* (a
+cumulative effect over 415 orbits per century), not the instantaneous
 momentum. Confusing the two would produce a confident wrong answer.

@@ -1,4 +1,4 @@
-# collapse — time series as sequences of measurement collapses
+# collapse: time series as sequences of measurement collapses
 
 A classical HMM carries a probability vector. An HQMM carries a **density
 matrix**, and observing symbol `x` applies a Kraus operator and renormalises,
@@ -27,7 +27,7 @@ process (Gu, Wiesner, Rieper & Vedral, *Nat. Commun.* **3**:762, 2012).
 
 The `p = 0.5` point is a required regression test rather than a curiosity.
 There the output is i.i.d., the two causal states become predictively
-identical and **merge**, so `C_mu` drops discontinuously to 0 — not to 1. An
+identical and **merge**, so `C_mu` drops discontinuously to 0, not to 1. An
 epsilon-machine returning 1 bit there has no state merging.
 
 ## The failure mode that makes this estimate untrustworthy
@@ -36,8 +36,8 @@ epsilon-machine returning 1 bit there has no state merging.
 
 Two conditional distributions estimated from finite counts are **never
 exactly equal**, so a float-equality merge merges nothing, and the estimate
-counts histories instead of structure. On Mersenne-Twister bits — no
-structure by construction — `C_mu` climbed to **5.5 bits**.
+counts histories instead of structure. On Mersenne-Twister bits (no
+structure by construction), `C_mu` climbed to **5.5 bits**.
 
 The negative control is what exposed it. With a two-proportion test at 2.5σ,
 as CSSR makes, the control collapses to ~0 at every length and the real data
@@ -51,7 +51,7 @@ plateaus:
 So Seattle carries about **1.44 bits** of classical predictive state, not the
 0.98 that order 1 alone suggests, and the quantum saving at the plateau is
 **78.5%** rather than 71.9%. Both numbers are defensible about different
-objects — one describes the first-order *model*, the other the process as far
+objects: one describes the first-order *model*, the other the process as far
 as 1461 days can show it.
 
 ## The headline negative result
@@ -66,7 +66,7 @@ Two fixes were needed before that sentence was safe to write:
 
 **The classical side was under-tuned.** Without random restarts the HMM at
 `k = 2` and `k = 3` converges to a degenerate single-emission solution and
-returns exactly the i.i.d. NLL. With restarts they reach 0.855 and 0.862 —
+returns exactly the i.i.d. NLL. With restarts they reach 0.855 and 0.862,
 which makes the baseline *stronger*, the direction that matters.
 
 **A single fit nearly produced a false reversal.** One `hqmm-d3` fit scored
@@ -87,7 +87,7 @@ series satisfies macrorealism by construction: every value is definite and
 stored.
 
 Worse, a classical Gaussian process with `r(τ) = cos(ωτ)`, sign-dichotomised,
-has correlator `(2/π)·arcsin(r)` by the Van Vleck law — a triangle wave that
+has correlator `(2/π)·arcsin(r)` by the Van Vleck law, a triangle wave that
 **saturates `K3 = 1` exactly at every lag**. A classical oscillator imitates
 the quantum shape maximally.
 

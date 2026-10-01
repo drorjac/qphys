@@ -5,7 +5,7 @@ that the cited work does not. BibTeX for every entry is in
 [`references.bib`](references.bib), each checked against its DOI or arXiv
 record.
 
-## collapse — quantum models of classical time series
+## collapse: quantum models of classical time series
 
 **Computational mechanics** (Crutchfield & Young 1989,
 `crutchfield1989inferring`) defines the causal states of a process and its
@@ -36,7 +36,7 @@ times. This project shows why that test says nothing about a passively
 recorded series: with an aligned estimator `K3 ≤ 1` is an identity, so a
 "violation" can only be an estimator bug.
 
-## lawlearn — learning the law from trajectories
+## lawlearn: learning the law from trajectories
 
 **Hamiltonian and Lagrangian neural networks** (Greydanus, Dzamba &
 Yosinski 2019, `greydanus2019hnn`; Cranmer et al. 2020, `cranmer2020lnn`)

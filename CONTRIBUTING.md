@@ -34,8 +34,8 @@ point, and the story is in the README.
    has broken the project regardless of what it added.
 
 3. **Match capacity, not state count.** Compare at equal free-parameter count
-   and say how you counted — see `qphys.common.metrics.free_params`, whose
-   docstring carries the derivation. A model beaten by a *larger* model has
+   and say how you counted (see `qphys.common.metrics.free_params`, whose
+   docstring carries the derivation). A model beaten by a *larger* model has
    not been beaten at matched capacity.
 
 4. **Temporal split, declared before the first fit.** Never tune on test, and
@@ -51,7 +51,7 @@ point, and the story is in the README.
 
 7. **Pre-declare convergence criteria.** Discarding a run is legitimate only
    against a threshold fixed in advance, on *training* loss, never on the
-   answer — `qphys.common.seeding.CONVERGENCE_REL_LOSS`. If the data carries
+   answer (`qphys.common.seeding.CONVERGENCE_REL_LOSS`). If the data carries
    noise, gate the **excess over the noise floor**, since a fixed absolute
    threshold is unreachable by construction above about 2% noise.
 

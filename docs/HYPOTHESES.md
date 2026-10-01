@@ -1,4 +1,4 @@
-# Hypotheses — the claims this project tests
+# Hypotheses: the claims this project tests
 
 Every experiment in the repository exists to test one of the claims below.
 Each carries what would **refute** it and the test that re-checks it on every
@@ -8,12 +8,12 @@ carries none, so it cannot drift.
 
 | # | Claim | Status |
 |---|---|---|
-| C1 | A quantum model **predicts** a real series better than the best classical model at matched capacity | **not shown — it loses** |
-| C2 | Quantum causal states **represent** a process with less memory than classical ones | **holds** — a theorem, checked on real data |
+| C1 | A quantum model **predicts** a real series better than the best classical model at matched capacity | **not shown: it loses** |
+| C2 | Quantum causal states **represent** a process with less memory than classical ones | **holds**: a theorem, checked on real data |
 | C3 | A Leggett–Garg violation in a recorded series would be evidence of anything | **false, provably** |
 | C4 | The speed limit is recoverable from slow motion alone | **holds** in simulation, with a stated failure rate |
-| C4b | A physics-structured network extrapolates better than a black box | **refuted** — only the extracted formula does |
-| C5 | That route works on real orbital data | **false** — Mercury is far too slow |
+| C4b | A physics-structured network extrapolates better than a black box | **refuted**: only the extracted formula does |
+| C5 | That route works on real orbital data | **false**: Mercury is far too slow |
 
 C1 and C2 are about different objects and must never be conflated: a large
 memory saving and a worse test NLL are both true at once.
@@ -27,7 +27,7 @@ Markov-1…4, HMM-2…4 and HQMM-d2/d3, each stochastic row over at least five
 seeds, compared at their free-parameter count.
 
 **Refuted if** some HQMM row, averaged over its seeds, beats every classical
-model with no more free parameters than it has — on a fresh fit, not only in
+model with no more free parameters than it has, on a fresh fit, not only in
 the committed table.
 
 **Guarded by** `tests/test_acceptance_seattle.py`
