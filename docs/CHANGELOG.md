@@ -6,6 +6,12 @@ by the experiment that produced it.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-01
+
+### Changed
+- The changelog and the contributing guide moved to `docs/`; plain
+  punctuation throughout the docs and figure labels.
+
 ### Added
 - **The reproduction contract.** `qphys verify CANDIDATE` compares a
   regenerated results directory with `results/` number by number (relative

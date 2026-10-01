@@ -9,8 +9,8 @@ abstract: >-
   `lawlearn` asks whether the speed of light can be read out of a network
   trained on slow motion alone, and what actually extrapolates.
 type: software
-version: 0.2.0
-date-released: "2026-09-26"
+version: 0.3.0
+date-released: "2026-10-01"
 license: MIT
 repository-code: "https://github.com/drorjac/qphys"
 keywords:
