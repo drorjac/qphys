@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Code style: ruff](https://img.shields.io/badge/lint-ruff-261230)](https://docs.astral.sh/ruff/)
 
-*Written 2024–2025.*
+*Written 2024–2025, released 2026.*
 
 Two different senses of *we do not know what happens next*, built as two
 sub-projects that share one set of honesty rules.
