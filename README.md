@@ -196,7 +196,7 @@ Logic lives in `src/`. A notebook imports it and is never the source of truth.
 
 ## The rules
 
-Seven of them, binding, in [CONTRIBUTING.md](CONTRIBUTING.md). The short
+Seven of them, binding, in [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md). The short
 version: never claim a series is quantum; the null result is a deliverable;
 match capacity, not state count; temporal splits declared up front; verify
 rather than assert; at least five seeds with the failure rate reported; and

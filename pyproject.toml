@@ -56,7 +56,7 @@ all = ["qphys[baselines,nn,quantum,notebooks]"]
 Homepage = "https://github.com/drorjac/qphys"
 Repository = "https://github.com/drorjac/qphys"
 Issues = "https://github.com/drorjac/qphys/issues"
-Changelog = "https://github.com/drorjac/qphys/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/drorjac/qphys/blob/main/docs/CHANGELOG.md"
 
 [project.scripts]
 qphys = "qphys.cli:main"

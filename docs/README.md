@@ -20,8 +20,8 @@ the corrections each result needed before it meant anything.
 | [HYPOTHESES.md](HYPOTHESES.md) | each claim, what would refute it, and the test that guards it |
 | [DECISIONS.md](DECISIONS.md) | what was decided, against what, and why, and what is open |
 | [RELATED_WORK.md](RELATED_WORK.md) | the prior work, and what this project adds to it |
-| [../CONTRIBUTING.md](../CONTRIBUTING.md) | the seven honesty rules, as contribution rules |
-| [../CHANGELOG.md](../CHANGELOG.md) | what changed and which measured numbers moved |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | the seven honesty rules, as contribution rules |
+| [CHANGELOG.md](CHANGELOG.md) | what changed and which measured numbers moved |
 
 ---
 
