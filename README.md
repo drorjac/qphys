@@ -226,6 +226,9 @@ What this project adds to each: [`docs/RELATED_WORK.md`](docs/RELATED_WORK.md).
 measures what a *known* law's prior is worth to a learner, on LIGO, NIST,
 COBE and JPL data. Both touch Mercury; they ask different questions and are
 kept separate on purpose ([`docs/DECISIONS.md`](docs/DECISIONS.md)).
+[`hybrid-network`](https://github.com/drorjac/hybrid-network) estimates
+rain from commercial microwave links with a power law and a GRU fused by a
+learned gate.
 
 Cite as in [`CITATION.cff`](CITATION.cff).
 
