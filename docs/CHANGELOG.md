@@ -6,6 +6,22 @@ by the experiment that produced it.
 
 ## [Unreleased]
 
+### Added
+- **`schrodinger` sub-project.** Finite-difference and spectral Hamiltonians,
+  a split-operator integrator, Born-rule sampling, wave-packet tunnelling,
+  recovery of the equation from psi(x, t) by sparse regression, and closed
+  forms by symbolic regression (PySR, optional extra `[sr]`). A six-part
+  tutorial in `docs/schrodinger/tutorial/`. `qphys run schrodinger` writes
+  seven `schrodinger_*.csv` tables; figures 08 to 14.
+
+### Fixed (before first results)
+- The five-point Laplacian left the point two steps past each wall at zero
+  instead of the odd reflection; eigenvalues converged as dx^1. They now
+  converge as dx^3.9983.
+- A rectangular barrier sampled pointwise was 1.6% too wide on the
+  tunnelling grid and transmitted up to 3.0% too little. Barriers are now
+  cell-averaged; agreement with the packet-averaged formula is 8.0e-4.
+
 ## [0.3.0] - 2026-10-01
 
 ### Changed

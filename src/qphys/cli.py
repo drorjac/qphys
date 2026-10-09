@@ -3,7 +3,9 @@
     qphys run collapse     the Seattle comparison: table, per-seed rows, memory
     qphys run lawlearn     the c_hat sweep, its noise rows, the readout
                            comparison, and the extrapolation benchmark
-    qphys run all          both (hours)
+    qphys run schrodinger  spectra, integrator checks, Born rule, tunnelling,
+                           and the equation and closed forms recovered from data
+    qphys run all          all three (hours)
     qphys figures [NAME]   every figure, or one, from results/
     qphys verify CANDIDATE compare a regenerated results directory with results/
     qphys info             resolved paths, and whether the loaders are offline
@@ -44,8 +46,14 @@ def _lawlearn() -> None:
     E.extrapolation()
 
 
+def _schrodinger() -> None:
+    from qphys.schrodinger import experiments as E
+
+    E.run_all()
+
+
 # The packages whose version can move a number in results/.
-PACKAGES = ("numpy", "scipy", "pandas", "torch", "hmmlearn", "scikit-learn")
+PACKAGES = ("numpy", "scipy", "pandas", "torch", "hmmlearn", "scikit-learn", "pysr")
 
 
 def _version(name: str) -> str | None:
@@ -94,6 +102,7 @@ def _record_environment() -> None:
 TARGETS: dict[str, Callable[[], None]] = {
     "collapse": _collapse,
     "lawlearn": _lawlearn,
+    "schrodinger": _schrodinger,
 }
 
 

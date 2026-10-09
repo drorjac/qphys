@@ -524,8 +524,14 @@ ALL = (
 )
 
 
+def _schrodinger_figures():
+    from qphys.schrodinger.figures import ALL as SCHRODINGER
+
+    return SCHRODINGER
+
+
 def build(only: str | None = None) -> None:
-    for fn in ALL:
+    for fn in (*ALL, *_schrodinger_figures()):
         if only and only not in fn.__name__:
             continue
         fn()

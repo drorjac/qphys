@@ -42,6 +42,8 @@ baselines = ["hmmlearn>=0.3", "statsmodels>=0.14", "scikit-learn>=1.4"]
 nn = ["torch>=2.0"]
 # Continuous measurement (Project 1 extension) and sparse regression.
 quantum = ["qutip>=5.0", "pysindy>=2.0"]
+# Symbolic regression for the schrodinger sub-project. Pulls Julia on first use.
+sr = ["pysr>=1.0"]
 notebooks = ["nbformat", "nbconvert", "jupyter", "ipykernel"]
 dev = [
     "qphys[baselines,nn,quantum,notebooks]",

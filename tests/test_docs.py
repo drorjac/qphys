@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-TOPICS = ("collapse", "lawlearn")
+TOPICS = ("collapse", "lawlearn", "schrodinger")
 SKIP = ("http", "https", "mailto:", "#")
 
 

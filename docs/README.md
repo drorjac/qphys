@@ -8,6 +8,7 @@ One folder per sub-project, plus the detailed findings.
 |---|---|---|
 | [**collapse**](collapse/) | the **outcome** | Kraus operators and HQMMs, classical and quantum causal states, the Leggett–Garg guardrail, and the Seattle comparison |
 | [**lawlearn**](lawlearn/) | the **law** | the momentum network and its three gauges, the readout's error floor, extrapolation, and the Mercury acceptance suite |
+| [**schrodinger**](schrodinger/) | the **equation itself** | a six-part tutorial from de Broglie to tunnelling, verified solvers, the Born rule tested by sampling, and the equation recovered from psi(x, t) by sparse and symbolic regression |
 
 Each topic page carries its figures beside the text that explains them, and
 the corrections each result needed before it meant anything.
